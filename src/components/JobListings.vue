@@ -1,10 +1,10 @@
 <script setup>
+import PulseLoader from 'vue-spinner/src/PulseLoader.vue'
+import { reactive, onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
-import { ref } from 'vue'
+import axios from 'axios'
 
 import JobListing from '@/components/JobListing.vue'
-
-import jobData from '@/jobs.json'
 
 defineProps({
     limit: {
@@ -17,7 +17,26 @@ defineProps({
     },
 })
 
-const jobs = ref(jobData)
+/**
+ * - reactive() :: Unicamente recibe objetos
+ * - ref() :: Puede recibir objetos o primitivos
+ * ** ref() tiene una propiedad value para reasignar su valor, reactive() no usa dicha propiedad y su valor no se puede reasignar.
+*/
+const state = reactive({
+    jobs: [],
+    isLoading: true
+})
+
+onMounted(async () => {
+    try {
+        const response = await axios.get('http://localhost:3001/jobs')
+        state.jobs = response.data
+    } catch (error) {
+        console.error(`Error fetching jobs: ${error.message}`)
+    } finally {
+        state.isLoading = false
+    }
+})
 </script>
 
 <template>
@@ -26,9 +45,12 @@ const jobs = ref(jobData)
             <h2 class="text-3xl font-bold text-green-500 mb-6 text-center">
                 Browse Jobs
             </h2>
+            <div v-if="state.isLoading" class="text-center test-gray-500 py-6">
+                <PulseLoader />
+            </div>
             <div class="grid grid-cols-3 gap-6">
                 <JobListing
-                    v-for="job in jobs.slice(0, limit)"
+                    v-for="job in state.jobs.slice(0, limit)"
                     :key="job.id"
                     :job="job"
                 />
