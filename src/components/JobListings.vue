@@ -21,15 +21,15 @@ defineProps({
  * - reactive() :: Unicamente recibe objetos
  * - ref() :: Puede recibir objetos o primitivos
  * ** ref() tiene una propiedad value para reasignar su valor, reactive() no usa dicha propiedad y su valor no se puede reasignar.
-*/
+ */
 const state = reactive({
     jobs: [],
-    isLoading: true
+    isLoading: true,
 })
 
 onMounted(async () => {
     try {
-        const response = await axios.get('http://localhost:3001/jobs')
+        const response = await axios.get('/api/jobs')
         state.jobs = response.data
     } catch (error) {
         console.error(`Error fetching jobs: ${error.message}`)
