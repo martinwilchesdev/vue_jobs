@@ -8,8 +8,7 @@ import JobListing from '@/components/JobListing.vue'
 
 defineProps({
     limit: {
-        type: Number,
-        default: 3,
+        type: Number
     },
     showButton: {
         type: Boolean,
@@ -50,7 +49,7 @@ onMounted(async () => {
             </div>
             <div class="grid grid-cols-3 gap-6">
                 <JobListing
-                    v-for="job in state.jobs.slice(0, limit)"
+                    v-for="job in state.jobs.slice(0, limit || state.jobs.length)"
                     :key="job.id"
                     :job="job"
                 />

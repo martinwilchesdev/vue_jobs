@@ -1,9 +1,10 @@
 <script setup>
+import PulseLoader from 'vue-spinner/src/PulseLoader.vue'
 import { useToast } from 'vue-toastification'
-import { reactive } from 'vue'
+import { reactive, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+import router from '@/router'
 import axios from 'axios'
-
-import router from '@/router/index'
 
 const form = reactive({
     type: 'Full-Time',
@@ -19,43 +20,73 @@ const form = reactive({
     },
 })
 
+const state = reactive({
+    job: {},
+    isLoading: true,
+})
+
 const toast = useToast()
+const route = useRoute()
 
-const handleSubmit = async () => {
-    const newJob = {
-        title: form.title,
-        type: form.type,
-        location: form.location,
-        description: form.description,
-        salary: form.salary,
-        company: {
-            name: form.company.name,
-            description: form.company.description,
-            contactEmail: form.company.contactEmail,
-            contactPhone: form.company.contactPhone,
-        },
-    }
-
+const handleEdit = async () => {
     try {
-        const response = await axios.post('/api/jobs', newJob)
-        toast.success('Job Added Successfully')
+        const newJob = {
+            title: form.title,
+            type: form.type,
+            location: form.location,
+            description: form.description,
+            salary: form.salary,
+            company: {
+                name: form.company.name,
+                description: form.company.description,
+                contactEmail: form.company.contactEmail,
+                contactPhone: form.company.contactPhone,
+            },
+        }
+
+        const response = await axios.put(`/api/jobs/${route.params.id}`, newJob)
+        toast.success('Job Updated Successfully')
         router.push(`/jobs/${response.data.id}`)
     } catch (error) {
-        console.error(`The was not added: ${error.message}`)
-        toast.error('Job Was Not Added')
+        console.error(`Job was not updated`)
+        toast.error('Job Was Not Updated')
     }
 }
+
+onMounted(async () => {
+    try {
+        const response = await axios.get(`/api/jobs/${route.params.id}`)
+        state.job = response.data
+
+        form.type = state.job.type
+        form.title = state.job.title
+        form.description = state.job.description
+        form.salary = state.job.salary
+        form.location = state.job.location
+        form.company.name = state.job.company.name
+        form.company.description = state.job.company.description
+        form.company.contactEmail = state.job.company.contactEmail
+        form.company.contactPhone = state.job.company.contactPhone
+    } catch (error) {
+        console.error(`Error fetching jobs: ${error.message}`)
+    } finally {
+        state.isLoading = false
+    }
+})
 </script>
 
 <template>
-    <section class="bg-green-50">
+    <div v-if="state.isLoading" class="text-center test-gray-500 py-6">
+        <PulseLoader />
+    </div>
+    <section v-else class="bg-green-50">
         <div class="container m-auto max-w-2xl py-24">
             <div
                 class="bg-white px-6 py-8 mb-4 shadow-md rounded-md border m-4 md:m-0"
             >
-                <form @submit.prevent="handleSubmit">
+                <form @submit.prevent="handleEdit">
                     <h2 class="text-3xl text-center font-semibold mb-6">
-                        Add Job
+                        Edit Job
                     </h2>
 
                     <div class="mb-4">
@@ -221,7 +252,7 @@ const handleSubmit = async () => {
                             class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full w-full focus:outline-none focus:shadow-outline"
                             type="submit"
                         >
-                            Add Job
+                            Update Job
                         </button>
                     </div>
                 </form>

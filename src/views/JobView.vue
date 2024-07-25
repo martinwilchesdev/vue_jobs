@@ -1,10 +1,14 @@
 <script setup>
-import PulseLoader from 'vue-spinner/src/PulseLoader.vue'
-import BackButton from '@/components/BackButton.vue'
 import { RouterLink, useRoute } from 'vue-router'
+import { useToast } from 'vue-toastification'
 import { reactive, onMounted } from 'vue'
+import router from '@/router'
 import axios from 'axios'
 
+import PulseLoader from 'vue-spinner/src/PulseLoader.vue'
+import BackButton from '@/components/BackButton.vue'
+
+const toast = useToast()
 const route = useRoute()
 const jobid = route.params.id
 
@@ -12,6 +16,19 @@ const state = reactive({
     job: {},
     isLoading: true,
 })
+
+const handleDelete = async () => {
+    try {
+        if (window.confirm('Are you sure you want to delete the job')) {
+            await axios.delete(`/api/jobs/${state.job.id}`)
+            toast.success('Job Deleted Successfully')
+            router.push('/jobs')
+        }
+    } catch (error) {
+        console.log(`Error deleting job: ${error.message}`)
+        toast.error('Job Was Not Deleted')
+    }
+}
 
 onMounted(async () => {
     try {
@@ -44,7 +61,7 @@ onMounted(async () => {
                             class="text-gray-500 mb-4 flex align-middle justify-center md:justify-start"
                         >
                             <i
-                                class="fa-solid fa-location-dot text-lg text-orange-700 mr-2"
+                                class="pi pi-map-marker text-xl text-orange-700 mr-2"
                             ></i>
                             <p class="text-orange-700">
                                 {{ state.job.location }}
@@ -106,6 +123,7 @@ onMounted(async () => {
                         </RouterLink>
                         <button
                             class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-full w-full focus:outline-none focus:shadow-outline mt-4 block"
+                            @click="handleDelete"
                         >
                             Delete Job
                         </button>

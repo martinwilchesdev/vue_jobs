@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
 import NotFoundView from '@/views/NotFoundView.vue'
+import EditJobView from '@/views/EditJobView.vue'
 import AddJobView from '@/views/AddJobView.vue'
 import HomeView from '@/views/HomeView.vue'
 import JobsView from '@/views/JobsView.vue'
@@ -28,6 +29,11 @@ const router = createRouter({
             path: '/jobs/add',
             name: 'add-job',
             component: AddJobView
+        },
+        {
+            path: '/jobs/edit/:id',
+            name: 'edit-job',
+            component: EditJobView
         },
         {
             path: '/:catchAll(.*)', // captura todos los accesos a las rutas que no han sido definidas
